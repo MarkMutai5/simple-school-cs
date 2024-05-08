@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SampleSchool.Context;
 using SampleSchool.Models;
 using SampleSchool.Repositories;
 
@@ -8,30 +10,48 @@ namespace SampleSchool.Controllers;
 [Route("api/[controller]")] //ensures all endpoints share the same name
 public class StudentsController : ControllerBase
 {
+    // private readonly IStudentRepository _studentRepository;
+    private readonly ApplicationContext _context;
 
-    private readonly IStudentRepository _studentRepository;
-
-    public StudentsController( IStudentRepository studentRepository)
+    public StudentsController(ApplicationContext context)
     {
-        _studentRepository = studentRepository;
-   }
+        _context = context;
+    }
+
+    // public StudentsController(IStudentRepository studentRepository)
+    // {
+    //     _studentRepository = studentRepository;
+    // }
 
     [HttpGet("getStudents")]
-    public ActionResult GetStudents()
+    public async Task<IActionResult> GetStudents()
     {
-        List<Student> students = _studentRepository.GetAll().ToList();
+        var students = await _context.Students.ToListAsync();
         return Ok(students);
     }
 
     [HttpGet("getStudentById/{id}")]
-    public string GetStudentById([FromRoute] int id ) //from route ensures it comes from the route
+    public async Task<IActionResult> GetStudentById([FromRoute] int id) //from route ensures it comes from the route
     {
-        return "Getting one student";
+        var item = await _context.Students.FirstOrDefault(x=> x.Id == id);
+        if (item == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(item);
     }
 
     [HttpPost("addStudent")]
-    public string AddStudent()
+    public async Task<IActionResult> AddStudent(Student data)
     {
-        return "Add student";
+        if (ModelState.IsValid)
+        {
+            await _context.Students.AddAsync(data);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        return new JsonResult("Bad Request.") { StatusCode = 400 };
     }
 }

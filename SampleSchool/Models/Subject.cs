@@ -8,5 +8,4 @@ public class Subject
     public int Id { get; set; }
     public string  name { get; set; }
     public string shortCode { get; set; }
-    public Student Student { get; set; }
 }
