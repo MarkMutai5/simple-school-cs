@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SampleSchool.Context;
+using SampleSchool.ModelDTos;
 using SampleSchool.Models;
 using SampleSchool.Repositories;
 
@@ -24,16 +25,16 @@ public class StudentsController : ControllerBase
     // }
 
     [HttpGet("getStudents")]
-    public async Task<IActionResult> GetStudents()
+    public async Task<IActionResult> GetStudents(StudentListDto studentListDto)
     {
         var students = await _context.Students.ToListAsync();
         return Ok(students);
     }
 
-    [HttpGet("getStudentById/{id}")]
+    [HttpGet("getStudent/{id}")]
     public async Task<IActionResult> GetStudentById([FromRoute] int id) //from route ensures it comes from the route
     {
-        var item = await _context.Students.FirstOrDefault(x=> x.Id == id);
+        var item = await _context.Students.FirstOrDefaultAsync(x=> x.Id == id);
         if (item == null)
         {
             return NotFound();
@@ -43,11 +44,19 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("addStudent")]
-    public async Task<IActionResult> AddStudent(Student data)
+    public async Task<IActionResult> AddStudent([FromBody] StudentListDto student)
     {
         if (ModelState.IsValid)
         {
-            await _context.Students.AddAsync(data);
+            var newStudent = new Student
+            {
+                firstName = student.firstName,
+                lastName = student.lastName,
+                feeBalance = student.feeBalance,
+                gender = student.gender,
+                dorm = student.dorm
+            };
+            await _context.Students.AddAsync(newStudent);
             await _context.SaveChangesAsync();
             return Ok();
         }
