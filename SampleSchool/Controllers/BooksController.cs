@@ -53,4 +53,32 @@ public class BooksController : ControllerBase
         var books = await _context.Books.ToListAsync();
         return Ok(books);
     }
+
+    [HttpPut("editBook{id}")]
+    public async Task<IActionResult> UpdateBook(int id, BookUpdateDto book)
+    {
+        var newData = new Book
+        {
+            Id = book.Id,
+            name = book.name,
+            publisher = book.publisher,
+        };
+        if (id != newData.Id)
+        {
+            return BadRequest();
+        }
+
+        var bookExists = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+        if (bookExists == null)
+        {
+            return NotFound();
+        }
+
+        bookExists.name = newData.name;
+        bookExists.publisher = newData.publisher;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

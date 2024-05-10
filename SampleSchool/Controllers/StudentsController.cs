@@ -34,7 +34,7 @@ public class StudentsController : ControllerBase
     [HttpGet("getStudent/{id}")]
     public async Task<IActionResult> GetStudentById([FromRoute] int id) //from route ensures it comes from the route
     {
-        var item = await _context.Students.FirstOrDefaultAsync(x=> x.Id == id);
+        var item = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
         if (item == null)
         {
             return NotFound();
@@ -62,5 +62,39 @@ public class StudentsController : ControllerBase
         }
 
         return new JsonResult("Bad Request.") { StatusCode = 400 };
+    }
+
+    [HttpPut("editStudent{id}")]
+    public async Task<IActionResult> UpdateStudent([FromRoute] int id, StudentUpdateDto student)
+    {
+        var newData = new Student
+        {
+            Id = student.Id,
+            firstName = student.firstName,
+            lastName = student.lastName,
+            feeBalance = student.feeBalance,
+            gender = student.gender,
+            dorm = student.dorm
+        };
+        if (id != newData.Id)
+        {
+            return BadRequest();
+        }
+
+        var studentExists = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
+        if (studentExists == null)
+        {
+            return NotFound();
+        }
+
+        studentExists.firstName = newData.firstName;
+        studentExists.lastName = student.lastName;
+        studentExists.feeBalance = student.feeBalance;
+        studentExists.gender = student.gender;
+        studentExists.dorm = student.dorm;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 }
