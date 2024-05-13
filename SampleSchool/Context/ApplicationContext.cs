@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SampleSchool.Models;
 
 namespace SampleSchool.Context;
 
-public class ApplicationContext : DbContext
+public class ApplicationContext : IdentityDbContext
 {
     public virtual DbSet<Student> Students { get; set; }
     public virtual DbSet<Book> Books { get; set; }
